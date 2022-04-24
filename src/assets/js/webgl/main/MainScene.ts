@@ -1,5 +1,4 @@
-import { Scene, WebGLRenderer, PerspectiveCamera, SphereGeometry, Mesh, MeshBasicMaterial, Raycaster, Vector2, Sphere, SpotLight, PointLight, AmbientLight, DirectionalLight } from 'three'
-import MainSphere from './Sphere'
+import { Scene, WebGLRenderer, PerspectiveCamera, Vector2 } from 'three'
 
 export default class MainScene {
     private canvas: HTMLCanvasElement
@@ -7,16 +6,11 @@ export default class MainScene {
     private camera!: PerspectiveCamera
     private renderer!: WebGLRenderer
     private period: number
-    private pointer: Vector2
-    private raycaster: Raycaster
-    private sphere!: MainSphere
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
 
         this.period = 10
-        this.raycaster = new Raycaster();
-        this.pointer = new Vector2();
 
         this.init()
         this.run()
@@ -38,24 +32,6 @@ export default class MainScene {
 
         this.camera.position.set(0, 0, 10)
         this.camera.lookAt(0, 0, 0)
-
-        this.sphere = new MainSphere(this.scene);
-
-        const light = new AmbientLight(0x1155ee)
-        this.scene.add(light)
-
-        const directionalLight = new DirectionalLight(0x000088, 0.9)
-        this.scene.add(directionalLight)
-
-        this.scene.add(this.sphere.mesh)
-        // this.scene.add(this.sphere.childrens)
-        this.onPointerMove = this.onPointerMove.bind(this)
-        window.addEventListener( 'pointermove', this.onPointerMove );
-    }
-
-    onPointerMove (e: MouseEvent) {
-        this.pointer.x = ( e.clientX / window.innerWidth ) * 2 - 1;
-	    this.pointer.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
     }
     
     // Run app, load things, add listeners, ...
@@ -80,20 +56,6 @@ export default class MainScene {
 
     animate() {
         window.requestAnimationFrame(this.animate.bind(this))
-
-        this.sphere.mesh.rotateY(0.001)
-        this.sphere.childrens.rotateY(0.001)
-
-        this.raycaster.setFromCamera( this.pointer, this.camera );
-
-        const intersects = this.raycaster.intersectObjects(this.sphere.childrensArray, false);
-
-        console.log(intersects)
-
-        for ( let i = 0; i < intersects.length; i ++ ) {
-            intersects[ i ].object.scale.set(0.001, 0.001, Math.min(0.015, intersects[ i ].object.scale.z + 0.0015));
-
-        }
 
         // Update ...
         if (this.resizeRendererToDisplaySize()) {
