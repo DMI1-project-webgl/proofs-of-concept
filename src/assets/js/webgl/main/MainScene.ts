@@ -39,6 +39,10 @@ export default class MainScene {
         this.scene = new Scene()
         this.camera = new PerspectiveCamera(90, aspect, 0.01, 1000)
 
+        this.scene.background = new Color( 0x0085DE )
+        //this.scene.fog = new FogExp2(0x0085DE, 0.15)
+
+        //this.addPollutionSmog(this.scene)
         
         this.camera.position.set(0, 0, 10)
         this.camera.lookAt(0, 0, 0)
@@ -116,6 +120,23 @@ export default class MainScene {
         this.render()
     }
 
+    addPollutionSmog(scene: Scene) {
+        const textureLoader = new TextureLoader()
+        const particleTexture = textureLoader.load('src/assets/js/webgl/texture/smoke-particle-texture.png')
+
+        const particlesGeometry = new SphereBufferGeometry(6, 200, 200)
+        const particlesMaterial = new PointsMaterial({
+            size: 0.2,
+            sizeAttenuation: true,
+            color: new Color(0x9ADC7B),
+            map: particleTexture,
+            transparent: true,
+            opacity: 0.2,
+        })
+
+        const particles = new Points(particlesGeometry, particlesMaterial)
+        scene.add(particles)
+    }
 
     orbitObjects(tn: number) {
         if (!this.object.group) return;
