@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Canvas from './components/Canvas.vue';
+import Information from './components/Information.vue';
 </script>
 
 <template>
@@ -13,6 +14,7 @@ import Canvas from './components/Canvas.vue';
   </div>
 
   <Canvas />
+  <Information />
 
   <router-view />
 </template>
