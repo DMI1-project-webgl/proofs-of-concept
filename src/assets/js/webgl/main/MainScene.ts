@@ -39,7 +39,7 @@ export default class MainScene {
         )
         this.scene.add(this.mesh)
 
-        this.camera = new PerspectiveCamera(90, aspect, 0.01, 1000)
+        this.camera = new PerspectiveCamera(75, aspect, 1.0, 1000)
 
         this.camera.position.set(0, 0, 3)
         this.camera.lookAt(0, 0, 0)
@@ -49,7 +49,7 @@ export default class MainScene {
         this.controls.enableDamping = true
 
         this.points = [{
-                position : new Vector3(0.05, 0.05, 0.05),
+                position : new Vector3(0.0, 0.0, 0.0),
                 element : document.querySelector('.point-0')
             }]
         
@@ -99,8 +99,8 @@ export default class MainScene {
             const screenPosition = point.position.clone()
             screenPosition.project(this.camera)
 
-            const translateX = screenPosition.x * this.canvas.clientWidth * 0.5
-            const translateY = screenPosition.y * this.canvas.clientHeight * 0.5
+            const translateX = (screenPosition.x * this.canvas.clientWidth * 0.5)
+            const translateY = -screenPosition.y * this.canvas.clientHeight * 0.5
             //transform: translateX(11.1454px) translateY(-18.9525px);
             console.log(translateX)
             console.log(translateY)

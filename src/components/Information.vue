@@ -39,7 +39,7 @@ export default defineComponent({
         background: #FFFFFF;
         color: #ffffff;
         font-family: Helvetica, Arial, sans-serif;
-        information--text-align: center;
+        text-align: center;
         line-height: 40px;
         font-weight: 100;
         font-size: 14px;
@@ -63,7 +63,7 @@ export default defineComponent({
         margin-left: 30px;
         background: #ffffff77;
         font-size: 14px;
-        information--pointer-events: none;
+        pointer-events: none;
         cursor: help;
         height: 0px;
         overflow: hidden;
