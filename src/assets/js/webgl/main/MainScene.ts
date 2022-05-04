@@ -1,5 +1,5 @@
-import { Scene, WebGLRenderer, PerspectiveCamera, SphereGeometry, Mesh, MeshBasicMaterial, Raycaster, Vector2, Sphere, SpotLight, PointLight, AmbientLight, DirectionalLight, FogExp2, Color, Fog, SphereBufferGeometry, PointsMaterial, Points, TextureLoader } from 'three'
-import { toHandlers } from 'vue'
+import { Scene, WebGLRenderer, PerspectiveCamera, Mesh, Raycaster, Vector2, Vector3, AmbientLight, DirectionalLight, Color, ShaderMaterial, SphereGeometry, MeshBasicMaterial, DoubleSide } from 'three'
+
 import Seashell from './Seashell'
 import MainSphere from './Sphere'
 
@@ -40,9 +40,6 @@ export default class MainScene {
         this.camera = new PerspectiveCamera(90, aspect, 0.01, 1000)
 
         this.scene.background = new Color( 0x0085DE )
-        //this.scene.fog = new FogExp2(0x0085DE, 0.15)
-
-        //this.addPollutionSmog(this.scene)
         
         this.camera.position.set(0, 0, 10)
         this.camera.lookAt(0, 0, 0)
@@ -54,9 +51,9 @@ export default class MainScene {
 
         const directionalLight = new DirectionalLight(0x000088, 0.9)
         this.scene.add(directionalLight)
-        this.object = new Seashell(this.scene)
 
-        this.scene.add(this.sphere.mesh)        
+        this.scene.add(this.sphere.mesh)
+        this.addPollutionSmog()      
 
         // this.scene.add(this.sphere.childrens)
         this.onPointerMove = this.onPointerMove.bind(this)
@@ -97,16 +94,14 @@ export default class MainScene {
     animate() {
         window.requestAnimationFrame(this.animate.bind(this))
 
-        //this.sphere.mesh.rotateY(0.001)
-        //this.sphere.childrens.rotateY(0.001)
-
         this.growGrass()
 
         // Animation
         // Periodique time
         const tn = ((Date.now() * 0.001) % this.period) / this.period
 
-        this.orbitObjects(tn)
+        this.sphere.mesh.rotateY(0.001)
+        this.sphere.childrens.rotateY(0.001)
 
         // Update ...
         if (this.resizeRendererToDisplaySize()) {
@@ -120,22 +115,89 @@ export default class MainScene {
         this.render()
     }
 
-    addPollutionSmog(scene: Scene) {
-        const textureLoader = new TextureLoader()
-        const particleTexture = textureLoader.load('src/assets/js/webgl/texture/smoke-particle-texture.png')
-
-        const particlesGeometry = new SphereBufferGeometry(6, 200, 200)
-        const particlesMaterial = new PointsMaterial({
-            size: 0.2,
-            sizeAttenuation: true,
-            color: new Color(0x9ADC7B),
-            map: particleTexture,
-            transparent: true,
-            opacity: 0.2,
-        })
-
-        const particles = new Points(particlesGeometry, particlesMaterial)
-        scene.add(particles)
+    addPollutionSmog() { 
+            var vertexShader = [
+                'varying vec3 vNormal;',
+                'varying vec3 vWorldPosition;',
+                
+                'void main(){',
+                    '// compute intensity',
+                    'vNormal		= normalize( normalMatrix * normal );',
+        
+                    'vec4 worldPosition	= modelMatrix * vec4( position, 1.0 );',
+                    'vWorldPosition		= worldPosition.xyz;',
+        
+                    '// set gl_Position',
+                    'gl_Position	= projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+                '}',
+            ].join('\n')
+            var fragmentShader = [
+                'varying vec3	vNormal;',
+                'varying vec3	vWorldPosition;',
+        
+                'uniform vec3   lightColor;',
+        
+                'uniform vec3	spotPosition;',
+        
+                'uniform float	attenuation;',
+                'uniform float	anglePower;',
+        
+                'void main(){',
+                    'float intensity;',
+        
+                    //////////////////////////////////////////////////////////
+                    // distance attenuation					//
+                    //////////////////////////////////////////////////////////
+                    'intensity	= distance(vWorldPosition, spotPosition)/attenuation * 0.6;',
+                    'intensity	= 1.0 - clamp(intensity, 0.0, 1.0);',
+        
+                    //////////////////////////////////////////////////////////
+                    // intensity on angle					//
+                    //////////////////////////////////////////////////////////
+                    'vec3 normal    = vec3(vNormal.x, vNormal.y, abs(vNormal.z));',
+                    'float angleIntensity	= pow( dot(normal, vec3(0.0, 0.0, 1.0)), anglePower );',
+                    'intensity	= intensity * angleIntensity;',		
+                    'gl_FragColor	= vec4( lightColor, intensity );',
+        
+                    //////////////////////////////////////////////////////////
+                    // final color						//
+                    //////////////////////////////////////////////////////////
+        
+                    // set the final color
+                    'gl_FragColor	= vec4( lightColor, intensity) ;',
+                '}',
+            ].join('\n')
+        
+            // create custom material from the shader code above
+            //   that is within specially labeled script tags
+            var material = new ShaderMaterial({
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                uniforms: { 
+                    attenuation: {
+                        value: 10
+                    },
+                    anglePower: {
+                        value: 8
+                    },
+                    spotPosition: {
+                        value: new Vector3(0, 0, 0)
+                    },
+                    lightColor: {
+                        value: new Color(0xCAC92B)
+                    },
+                },
+                side: DoubleSide,
+                // blending	: THREE.AdditiveBlending,
+                transparent: true,
+                depthWrite: false,
+            });
+            const basicMaterial = new MeshBasicMaterial({
+                color: 0xff0000
+            })
+            const geometry = new SphereGeometry(7.8, 40, 28)
+            const mesh = new Mesh(geometry, material)
+            this.scene.add(mesh)
     }
 
     orbitObjects(tn: number) {
