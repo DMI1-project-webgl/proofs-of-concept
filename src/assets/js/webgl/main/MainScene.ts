@@ -1,4 +1,5 @@
-import { Scene, WebGLRenderer, PerspectiveCamera, Vector2 } from 'three'
+import { Scene, WebGLRenderer, PerspectiveCamera, Vector2, Color } from 'three'
+import MainFish from './MainFish'
 
 export default class MainScene {
     private canvas: HTMLCanvasElement
@@ -6,6 +7,7 @@ export default class MainScene {
     private camera!: PerspectiveCamera
     private renderer!: WebGLRenderer
     private period: number
+    private mainFish: MainFish
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
@@ -30,8 +32,12 @@ export default class MainScene {
         this.scene = new Scene()
         this.camera = new PerspectiveCamera(90, aspect, 0.01, 1000)
 
+        this.scene.background = new Color(0xFFFFFF)
+
         this.camera.position.set(0, 0, 10)
         this.camera.lookAt(0, 0, 0)
+
+        this.mainFish = new MainFish(this.renderer, this.scene)
     }
     
     // Run app, load things, add listeners, ...
@@ -69,6 +75,8 @@ export default class MainScene {
         // Periodique time
         const tn = ((Date.now() * 0.001) % this.period) / this.period
 
+        this.mainFish.render(10000,10000)
+
         // Render ...
         this.render()
     }
@@ -82,3 +90,7 @@ export default class MainScene {
         this.renderer = null
     }
 }
+
+
+
+
