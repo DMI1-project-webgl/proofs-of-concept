@@ -122,13 +122,13 @@ export default class MainScene {
                 
                 'void main(){',
                     '// compute intensity',
-                    'vNormal		= normalize( normalMatrix * normal );',
+                    'vNormal = normalize( normalMatrix * normal );',
         
                     'vec4 worldPosition	= modelMatrix * vec4( position, 1.0 );',
-                    'vWorldPosition		= worldPosition.xyz;',
+                    'vWorldPosition	= worldPosition.xyz;',
         
                     '// set gl_Position',
-                    'gl_Position	= projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
+                    'gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );',
                 '}',
             ].join('\n')
             var fragmentShader = [
@@ -148,23 +148,22 @@ export default class MainScene {
                     //////////////////////////////////////////////////////////
                     // distance attenuation					//
                     //////////////////////////////////////////////////////////
-                    'intensity	= distance(vWorldPosition, spotPosition)/attenuation * 0.6;',
-                    'intensity	= 1.0 - clamp(intensity, 0.0, 1.0);',
+                    'intensity = distance(vWorldPosition, spotPosition);',
+                    'intensity = 1.0 - clamp(intensity, 0.0, 1.0);',
         
                     //////////////////////////////////////////////////////////
                     // intensity on angle					//
                     //////////////////////////////////////////////////////////
-                    'vec3 normal    = vec3(vNormal.x, vNormal.y, abs(vNormal.z));',
+                    'vec3 normal = vec3(vNormal.x, vNormal.y, abs(vNormal.z));',
                     'float angleIntensity	= pow( dot(normal, vec3(0.0, 0.0, 1.0)), anglePower );',
-                    'intensity	= intensity * angleIntensity;',		
-                    'gl_FragColor	= vec4( lightColor, intensity );',
+                    'intensity = intensity * angleIntensity;',
         
                     //////////////////////////////////////////////////////////
                     // final color						//
                     //////////////////////////////////////////////////////////
         
                     // set the final color
-                    'gl_FragColor	= vec4( lightColor, intensity) ;',
+                    'gl_FragColor	= vec4( lightColor, angleIntensity / attenuation) ;',
                 '}',
             ].join('\n')
         
@@ -175,10 +174,10 @@ export default class MainScene {
                 fragmentShader: fragmentShader,
                 uniforms: { 
                     attenuation: {
-                        value: 10
+                        value: 1.15
                     },
                     anglePower: {
-                        value: 8
+                        value: 16
                     },
                     spotPosition: {
                         value: new Vector3(0, 0, 0)
@@ -195,7 +194,7 @@ export default class MainScene {
             const basicMaterial = new MeshBasicMaterial({
                 color: 0xff0000
             })
-            const geometry = new SphereGeometry(7.8, 40, 28)
+            const geometry = new SphereGeometry(8, 40, 40)
             const mesh = new Mesh(geometry, material)
             this.scene.add(mesh)
     }
