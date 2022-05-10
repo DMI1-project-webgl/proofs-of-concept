@@ -19,9 +19,19 @@ void main() {
 
     vec3 newPosition = position;
 
-    if ( birdVertex == 4.0 || birdVertex == 7.0 ) {
+    if ( birdVertex == 25.0 || birdVertex == 26.0) {
         // flap wings
-        newPosition.y = sin( tmpPos.w ) * 5.;
+        newPosition.y = (sin( tmpPos.w * 2.5 + 3.14) + 1.0) * 1.;
+    }
+
+    if ( birdVertex == 28.0 || birdVertex == 29.0 ) {
+        // flap wings
+        newPosition.y = (sin( tmpPos.w * 2.5) - 1.0) * 1.;
+    }
+
+    if ( birdVertex == 31.0 || birdVertex == 32.0 ) {
+        // flap wings
+        newPosition.y = sin( tmpPos.w * 1.5) * 1.;
     }
 
     newPosition = mat3( modelMatrix ) * newPosition;
@@ -57,5 +67,10 @@ void main() {
     z = newPosition.z;
 
     vColor = vec4( birdColor, 1.0 );
+
+    if ( birdVertex == 28.0 || birdVertex == 29.0 || birdVertex == 31.0 || birdVertex == 32.0) {
+        vColor = vec4( 1.0, 0.5, 0.5, 1.0 );
+    }
+
     gl_Position = projectionMatrix *  viewMatrix  * vec4( newPosition, 1.0 );
 }`

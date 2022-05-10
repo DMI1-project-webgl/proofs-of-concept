@@ -7,6 +7,7 @@ uniform float alignmentDistance; // 40
 uniform float cohesionDistance; //
 uniform float freedomFactor;
 uniform vec3 predator;
+uniform vec3 predator2;
 
 const float width = resolution.x;
 const float height = resolution.y;
@@ -21,10 +22,10 @@ float zoneRadiusSquared = 1600.0;
 float separationThresh = 0.45;
 float alignmentThresh = 0.65;
 
-const float UPPER_BOUNDS = BOUNDS;
+const float UPPER_BOUNDS = BOUNDS; // 800
 const float LOWER_BOUNDS = -UPPER_BOUNDS;
 
-const float SPEED_LIMIT = 9.0;
+const float SPEED_LIMIT = 3.0;
 
 float rand( vec2 co ){
     return fract( sin( dot( co.xy, vec2(12.9898,78.233) ) ) * 43758.5453 );
@@ -45,8 +46,11 @@ void main() {
     vec3 selfVelocity = texture2D( textureVelocity, uv ).xyz;
 
     float dist;
+    float dist2;
     vec3 dir; // direction
-    float distSquared;
+    vec3 dir2; // direction
+    float distSquared; // mouse
+    float distSquared2; // center sphere
 
     float separationSquared = separationDistance * separationDistance;
     float cohesionSquared = cohesionDistance * cohesionDistance;
@@ -59,21 +63,32 @@ void main() {
     float limit = SPEED_LIMIT;
 
     dir = predator * UPPER_BOUNDS - selfPosition;
+    dir2 = predator2 * UPPER_BOUNDS - selfPosition;
     dir.z = 0.;
+    // dir2.z = 0.;
     // dir.z *= 0.6;
     dist = length( dir );
+    dist2 = length( dir2 );
     distSquared = dist * dist;
+    distSquared2 = dist2 * dist2;
 
-    float preyRadius = 150.0;
+    float preyRadius = 200.0; // radius of sphere (base 150.0)
     float preyRadiusSq = preyRadius * preyRadius;
 
 
     // move birds away from predator
     if ( dist < preyRadius ) {
 
-        f = ( distSquared / preyRadiusSq - 1.0 ) * delta * 100.;
+        f = ( distSquared / preyRadiusSq - 1.0 ) * delta * 80.;
         velocity += normalize( dir ) * f;
-        limit += 5.0;
+        limit += 1.0;
+    }
+
+    if ( dist2 < preyRadius ) {
+
+        // f = ( distSquared2 / preyRadiusSq - 1.0 ) * delta * 100.;
+        // velocity += normalize( dir2 ) * f;
+        // limit += 5.0;
     }
 
 
@@ -86,8 +101,22 @@ void main() {
     dir = selfPosition - central;
     dist = length( dir );
 
+    // dir.x *= 2.5;
     dir.y *= 2.5;
-    velocity -= normalize( dir ) * delta * 5.;
+    // dir.z *= 2.5;
+    // velocity -= normalize( dir ) * delta * 5.;
+
+    float distanceToCenter = length( selfPosition );
+    float maxR = 164.0;
+    float minR = 160.0;
+
+    float onSphere = - step(maxR,distanceToCenter) + step(-maxR,distanceToCenter) - 1.0 - step(minR,distanceToCenter) + step(-minR,distanceToCenter); // -1 si trop loin | 1 si trop proche | 0 dans le perimetre
+    float mult = 0.1 * max(0.0,abs(distanceToCenter - minR + 2.0) - 0.0);
+
+    velocity.x = velocity.x + onSphere * (step(0.0,selfPosition.x) - 0.5) * mult * abs(selfPosition.x) * 0.01 + sin(time * 0.0005 + step(0.0,selfPosition.y) * PI) * 1.;
+    velocity.y = velocity.y + onSphere * (step(0.0,selfPosition.y) - 0.5) * mult * abs(selfPosition.y) * 0.01;
+    velocity.z = velocity.z + onSphere * (step(0.0,selfPosition.z) - 0.5) * mult * abs(selfPosition.z) * 0.01 + cos(time * 0.0005 + step(0.0,selfPosition.y) * PI) * 1.;
+
 
     for ( float y = 0.0; y < height; y++ ) {
         for ( float x = 0.0; x < width; x++ ) {
@@ -141,6 +170,12 @@ void main() {
 
     }
 
+    if (distanceToCenter < minR) {
+        velocity.x = velocity.x + 1.0 * (step(0.0,selfPosition.x) - 0.5);
+        velocity.y = velocity.y + 1.0 * (step(0.0,selfPosition.y) - 0.5);
+        velocity.z = velocity.z + 1.0 * (step(0.0,selfPosition.z) - 0.5);
+    }
+    
 
 
     // this make tends to fly around than down or up

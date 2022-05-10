@@ -1,10 +1,12 @@
 import { GPUComputationRenderer } from 'three/examples/jsm/misc/GPUComputationRenderer';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { HalfFloatType, ShaderMaterial, WebGLRenderer,Texture, RepeatWrapping, Color, DoubleSide, Mesh, Scene, Vector3} from 'three';
 import { fishFragmentShader } from '../shaders/fishFragmentShader';
 import { fishVertexShader } from '../shaders/fishVertexShader';
 import { fragmentPositionShader } from '../shaders/fragmentPosition';
 import { fragmentVelocityShader } from '../shaders/fragmentVelocity';
 import FishGeometry from './FishGeometry';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 
 export interface IUniform<TValue = any> {
     value: TValue;
@@ -34,7 +36,7 @@ export default class MainFish {
 
     private renderer: WebGLRenderer
     private scene: Scene
-    public WIDTH: number = 82
+    public WIDTH: number = 32
     private BOUNDS: number = 800
     private velocityVariable: GPUVariableDetail
     private positionVariable: GPUVariableDetail
@@ -94,6 +96,7 @@ export default class MainFish {
         this.velocityUniforms[ 'cohesionDistance' ] = { value: 1.0 };
         this.velocityUniforms[ 'freedomFactor' ] = { value: 1.0 };
         this.velocityUniforms[ 'predator' ] = { value: new Vector3() };
+        this.velocityUniforms[ 'predator2' ] = { value: new Vector3() };
         this.velocityVariable.material.defines.BOUNDS = this.BOUNDS.toFixed( 2 );
 
         this.velocityVariable.wrapS = RepeatWrapping;
@@ -108,6 +111,32 @@ export default class MainFish {
             console.error( error );
 
         }
+
+        const gui = new GUI();
+
+
+        const effectController = {
+            separation: 20.0,
+            alignment: 20.0,
+            cohesion: 20.0,
+            freedom: 0.75
+        };
+
+        const valuesChanger = () => {
+
+            this.velocityUniforms[ 'separationDistance' ].value = effectController.separation;
+            this.velocityUniforms[ 'alignmentDistance' ].value = effectController.alignment;
+            this.velocityUniforms[ 'cohesionDistance' ].value = effectController.cohesion;
+            this.velocityUniforms[ 'freedomFactor' ].value = effectController.freedom;
+
+        };
+
+        valuesChanger();
+
+        gui.add( effectController, 'separation', 0.0, 100.0, 1.0 ).onChange( valuesChanger );
+        gui.add( effectController, 'alignment', 0.0, 100, 0.001 ).onChange( valuesChanger );
+        gui.add( effectController, 'cohesion', 0.0, 100, 0.025 ).onChange( valuesChanger );
+        gui.close();
 
     }
 
@@ -187,10 +216,11 @@ export default class MainFish {
         this.fishUniforms[ 'time' ].value = now;
         this.fishUniforms[ 'delta' ].value = delta;
 
-        this.velocityUniforms[ 'predator' ].value.set( 0.5 * mouseX / (window.innerWidth / 2), - 0.5 * mouseY / (window.innerHeight / 2), 0 );
+        this.velocityUniforms[ 'predator2' ].value.set( 0.5 * 0 / (window.innerWidth * 0.5), - 0.5 * 0 / (window.innerHeight * 0.5), 0 );
+        this.velocityUniforms[ 'predator' ].value.set( 0.5 * mouseX / (window.innerWidth * 0.5), - 0.5 * mouseY / (window.innerHeight * 0.5), 0 );
 
-        mouseX = 10000;
-        mouseY = 10000;
+        // mouseX = 10000;
+        // mouseY = 10000;
 
         this.gpuCompute.compute();
 

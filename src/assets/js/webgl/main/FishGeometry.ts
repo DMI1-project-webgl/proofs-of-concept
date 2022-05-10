@@ -2,11 +2,12 @@ import { BufferAttribute, BufferGeometry, Color } from "three";
 
 export default class FishGeometry extends BufferGeometry {
 
-    private WIDTH: number = 32
+    private WIDTH: number
     private FISHS: number
-    private trianglesPerFish: number = 3
+    private trianglesPerFish: number = 11
     private triangles: number
     private points: number
+    private v: number = 0
     private vertices: BufferAttribute
     private fishColors: BufferAttribute
     private references: BufferAttribute
@@ -35,32 +36,100 @@ export default class FishGeometry extends BufferGeometry {
         // this.setAttribute( 'normal', new Float32Array( points * 3 ), 3 );
 
 
-        let v = 0;
-
-        const wingsSpan = 20;
+        const wingsSpan = 15;
 
         for ( let f = 0; f < this.FISHS; f ++ ) {
 
             // Body
 
-            this.verts_push([
+            /* this.verts_push([
                 0, - 0, - 20,
                 0, 4, - 20,
                 0, 0, 30
+            ]); */
+
+            this.verts_push([
+                0, 0, 24,
+                10, 0, 12,
+                0, 6, 12
             ]);
+
+            this.verts_push([
+                0, 0, 24,
+                0, -6, 12,
+                10, 0, 12
+            ]);
+
+            this.verts_push([
+                0, 0, 24,
+                -6, 0, 12,
+                0, -6, 12
+            ]);
+
+            this.verts_push([
+                0, 0, 24,
+                0, 6, 12,
+                -6, 0, 12
+            ]);
+
+
+
+            this.verts_push([
+                0, 0, -12,
+                0, 6, 12,
+                10, 0, 12
+            ]);
+
+            this.verts_push([
+                0, 0, -12,
+                10, 0, 12,
+                0, -6, 12
+            ]);
+
+            this.verts_push([
+                0, 0, -12,
+                0, -6, 12,
+                -6, 0, 12
+            ]);
+
+            this.verts_push([
+                0, 0, -12,
+                -6, 0, 12,
+                0, 6, 12
+            ]);
+            
+
 
             // Wings
 
+            // this.verts_push([
+            //     0, 0, - 15,
+            //     - wingsSpan, 0, 0,
+            //     0, 0, 15
+            // ]);
+
+            // this.verts_push([
+            //     0, 0, 15,
+            //     wingsSpan, 0, 0,
+            //     0, 0, - 15
+            // ]);
+
             this.verts_push([
-                0, 0, - 15,
-                - wingsSpan, 0, 0,
-                0, 0, 15
+                0, 2, 10,
+                3, - 5, 4,
+                -3, - 9, 4
             ]);
 
             this.verts_push([
-                0, 0, 15,
-                wingsSpan, 0, 0,
-                0, 0, - 15
+                0, -2, 10,
+                3, 5, 4,
+                -3, 9, 4
+            ]);
+
+            this.verts_push([
+                0, 0, -8,
+                13, 0, -18,
+                -13, 0, -18
             ]);
 
         }
@@ -81,7 +150,7 @@ export default class FishGeometry extends BufferGeometry {
 
             this.references.setXY(v, x, y)
 
-            this.fishVertex.setX(v, v % 9)
+            this.fishVertex.setX(v, v % 33)
 
         }
 
@@ -93,7 +162,9 @@ export default class FishGeometry extends BufferGeometry {
 
         for ( let i = 0; i < pos.length; i+=3 ) {
 
-            this.vertices.setXYZ(i, pos[ i ], pos[i + 1], pos[ i + 2]);
+            this.vertices.setXYZ(this.v, pos[ i ], pos[i + 1], pos[ i + 2]);
+
+            this.v++
 
         }
 
