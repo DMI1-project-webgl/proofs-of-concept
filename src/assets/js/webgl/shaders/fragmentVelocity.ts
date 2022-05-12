@@ -25,7 +25,7 @@ float alignmentThresh = 0.65;
 const float UPPER_BOUNDS = BOUNDS; // 800
 const float LOWER_BOUNDS = -UPPER_BOUNDS;
 
-const float SPEED_LIMIT = 3.0;
+const float SPEED_LIMIT = 4.0;
 
 float rand( vec2 co ){
     return fract( sin( dot( co.xy, vec2(12.9898,78.233) ) ) * 43758.5453 );
@@ -84,12 +84,12 @@ void main() {
         limit += 1.0;
     }
 
-    if ( dist2 < preyRadius ) {
+    // if ( dist2 < preyRadius ) {
 
         // f = ( distSquared2 / preyRadiusSq - 1.0 ) * delta * 100.;
         // velocity += normalize( dir2 ) * f;
         // limit += 5.0;
-    }
+    // }
 
 
     // if (testing == 0.0) {}
@@ -113,9 +113,9 @@ void main() {
     float onSphere = - step(maxR,distanceToCenter) + step(-maxR,distanceToCenter) - 1.0 - step(minR,distanceToCenter) + step(-minR,distanceToCenter); // -1 si trop loin | 1 si trop proche | 0 dans le perimetre
     float mult = 0.1 * max(0.0,abs(distanceToCenter - minR + 2.0) - 0.0);
 
-    velocity.x = velocity.x + onSphere * (step(0.0,selfPosition.x) - 0.5) * mult * abs(selfPosition.x) * 0.01 + sin(time * 0.0005 + step(0.0,selfPosition.y) * PI) * 1.;
-    velocity.y = velocity.y + onSphere * (step(0.0,selfPosition.y) - 0.5) * mult * abs(selfPosition.y) * 0.01;
-    velocity.z = velocity.z + onSphere * (step(0.0,selfPosition.z) - 0.5) * mult * abs(selfPosition.z) * 0.01 + cos(time * 0.0005 + step(0.0,selfPosition.y) * PI) * 1.;
+    velocity.x = velocity.x + onSphere * (step(0.0,selfPosition.x) - 0.5) * mult * abs(selfPosition.x) * 0.01 + sin(time * 0.0005 + step(0.0,selfPosition.y) * PI * 1.) * 1.;
+    velocity.y = velocity.y + onSphere * (step(0.0,selfPosition.y) - 0.5) * mult * abs(selfPosition.y) * 0.01 - selfPosition.y * 0.01;
+    velocity.z = velocity.z + onSphere * (step(0.0,selfPosition.z) - 0.5) * mult * abs(selfPosition.z) * 0.01 + cos(time * 0.0005 - step(0.0,selfPosition.y) * PI * 1.) * 1.;
 
 
     for ( float y = 0.0; y < height; y++ ) {

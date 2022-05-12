@@ -1,18 +1,24 @@
 export const fishVertexShader = `attribute vec2 reference;
 attribute float birdVertex;
 
-attribute vec3 birdColor;
+attribute float fishNumber;
+
+attribute vec3 fishColor;
 
 uniform sampler2D texturePosition;
 uniform sampler2D textureVelocity;
 
 varying vec4 vColor;
 varying float z;
+varying float vFishNumber;
 
 uniform float time;
 
+
 void main() {
 
+    vFishNumber = fishNumber;
+    
     vec4 tmpPos = texture2D( texturePosition, reference );
     vec3 pos = tmpPos.xyz;
     vec3 velocity = normalize(texture2D( textureVelocity, reference ).xyz);
@@ -66,11 +72,12 @@ void main() {
 
     z = newPosition.z;
 
-    vColor = vec4( birdColor, 1.0 );
+    vColor = vec4( fishColor, 1.0 );
 
-    if ( birdVertex == 28.0 || birdVertex == 29.0 || birdVertex == 31.0 || birdVertex == 32.0) {
-        vColor = vec4( 1.0, 0.5, 0.5, 1.0 );
-    }
+    // if ( birdVertex == 28.0 || birdVertex == 29.0 || birdVertex == 31.0 || birdVertex == 32.0) {
+    //     vColor = vec4( 0.0, 0.5, 0.5, 1.0 );
+    // }
 
     gl_Position = projectionMatrix *  viewMatrix  * vec4( newPosition, 1.0 );
+
 }`

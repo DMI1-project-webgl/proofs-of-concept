@@ -8,10 +8,12 @@ export default class FishGeometry extends BufferGeometry {
     private triangles: number
     private points: number
     private v: number = 0
+    private w: number = 0
     private vertices: BufferAttribute
     private fishColors: BufferAttribute
     private references: BufferAttribute
     private fishVertex: BufferAttribute
+    private fishNumber: BufferAttribute
 
     constructor(WIDTH: number) {
 
@@ -27,11 +29,13 @@ export default class FishGeometry extends BufferGeometry {
         this.fishColors = new BufferAttribute( new Float32Array( this.points * 3 ), 3 );
         this.references = new BufferAttribute( new Float32Array( this.points * 2 ), 2 );
         this.fishVertex = new BufferAttribute( new Float32Array( this.points ), 1 );
+        this.fishNumber = new BufferAttribute( new Float32Array( this.points ), 1 );
 
         this.setAttribute( 'position', this.vertices );
-        this.setAttribute( 'birdColor', this.fishColors );
+        this.setAttribute( 'fishColor', this.fishColors );
         this.setAttribute( 'reference', this.references );
         this.setAttribute( 'birdVertex', this.fishVertex );
+        this.setAttribute( 'fishNumber', this.fishNumber );
 
         // this.setAttribute( 'normal', new Float32Array( points * 3 ), 3 );
 
@@ -48,55 +52,131 @@ export default class FishGeometry extends BufferGeometry {
                 0, 0, 30
             ]); */
 
-            this.verts_push([
-                0, 0, 24,
-                10, 0, 12,
-                0, 6, 12
-            ]);
+            const rand = 0.2 + Math.random() * 0.7
+            const randC = Math.random()
+            let randR = 0.5 
+            let randG = 0.5
+            let randB = 0.5
+
+            if (randC < 0.1) {
+                randR = 1
+                randG = 1
+                randB = 1
+            } else if (randC < 0.5) {
+                randR = 0.5
+                randG = 0.5
+                randB = 0.9
+            } else if (randC < 0.8) {
+                randR = 1
+                randG = 0.8
+                randB = 1
+            } else {
+                randR = 0.4
+                randG = 0.4
+                randB = 0.6
+            }
+
+            const factorTop = 0.8
+            const factorMed = 1
+            const factorBot = 0.8
 
             this.verts_push([
-                0, 0, 24,
-                0, -6, 12,
+                0, 0, 20 + 6 * rand,
+                10, 0, 12,
+                0, 6 * rand, 12
+            ]);
+
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorTop*randR, factorTop*randG, factorTop*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+            ])
+
+            this.verts_push([
+                0, 0, 20 + 6 * rand,
+                0, -6 * rand, 12,
                 10, 0, 12
             ]);
 
-            this.verts_push([
-                0, 0, 24,
-                -6, 0, 12,
-                0, -6, 12
-            ]);
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorTop*randR, factorTop*randG, factorTop*randB,
+            ])
 
             this.verts_push([
-                0, 0, 24,
-                0, 6, 12,
-                -6, 0, 12
+                0, 0, 20 + 6 * rand,
+                -6 * rand, 0, 12,
+                0, -6 * rand, 12
             ]);
+
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorBot*randR, factorBot*randG, factorBot*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+            ])
+
+            this.verts_push([
+                0, 0, 20 + 6 * rand,
+                0, 6 * rand, 12,
+                -6 * rand, 0, 12
+            ]);
+
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorBot*randR, factorBot*randG, factorBot*randB,
+            ])
 
 
 
             this.verts_push([
                 0, 0, -12,
-                0, 6, 12,
+                0, 6 * rand, 12,
                 10, 0, 12
             ]);
+
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorTop*randR, factorTop*randG, factorTop*randB,
+            ])
 
             this.verts_push([
                 0, 0, -12,
                 10, 0, 12,
-                0, -6, 12
+                0, -6 * rand, 12
             ]);
+
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorTop*randR, factorTop*randG, factorTop*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+            ])
 
             this.verts_push([
                 0, 0, -12,
-                0, -6, 12,
-                -6, 0, 12
+                0, -6 * rand, 12,
+                -6 * rand, 0, 12
             ]);
+
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorBot*randR, factorBot*randG, factorBot*randB,
+            ])
 
             this.verts_push([
                 0, 0, -12,
-                -6, 0, 12,
-                0, 6, 12
+                -6 * rand, 0, 12,
+                0, 6 * rand, 12
             ]);
+
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorBot*randR, factorBot*randG, factorBot*randB,
+                factorMed*randR,factorMed*randG,factorMed*randB,
+            ])
             
 
 
@@ -120,17 +200,35 @@ export default class FishGeometry extends BufferGeometry {
                 -3, - 9, 4
             ]);
 
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorTop*randR, factorTop*randG, factorTop*randB,
+                factorBot*randR, factorBot*randG, factorBot*randB,
+            ])
+
             this.verts_push([
                 0, -2, 10,
                 3, 5, 4,
                 -3, 9, 4
             ]);
 
+            this.colors_push([
+                factorMed*randR,factorMed*randG,factorMed*randB,
+                factorTop*randR, factorTop*randG, factorTop*randB,
+                factorBot*randR, factorBot*randG, factorBot*randB,
+            ])
+
             this.verts_push([
                 0, 0, -8,
                 13, 0, -18,
                 -13, 0, -18
             ]);
+
+            this.colors_push([
+                factorMed*randR*0.8,factorMed*randG*0.8,factorMed*randB*0.8,
+                factorTop*randR, factorTop*randG, factorTop*randB,
+                factorBot*randR, factorBot*randG, factorBot*randB,
+            ])
 
         }
 
@@ -141,16 +239,11 @@ export default class FishGeometry extends BufferGeometry {
             const x = ( fishIndex % this.WIDTH ) / this.WIDTH;
             const y = ~ ~ ( fishIndex / this.WIDTH ) / this.WIDTH;
 
-            const c = new Color(
-                0x444444 +
-                ~ ~ ( v / 9 ) / this.FISHS * 0x666666
-            );
-
-            this.fishColors.setXYZ(v, c.r, c.g, c.b)
-
             this.references.setXY(v, x, y)
 
             this.fishVertex.setX(v, v % 33)
+
+            this.fishNumber.setX(v, Math.round(v / 33))
 
         }
 
@@ -165,6 +258,18 @@ export default class FishGeometry extends BufferGeometry {
             this.vertices.setXYZ(this.v, pos[ i ], pos[i + 1], pos[ i + 2]);
 
             this.v++
+
+        }
+
+    }
+
+    colors_push (color: number[]) {
+
+        for ( let i = 0; i < color.length; i+=3 ) {
+
+            this.fishColors.setXYZ(this.w, color[ i ], color[i + 1], color[ i + 2]);
+
+            this.w++
 
         }
 

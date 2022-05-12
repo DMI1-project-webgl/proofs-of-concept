@@ -29,15 +29,16 @@ type FishUniform = {
     'texturePosition': { value: any },
     'textureVelocity': { value: any },
     'time': { value: number },
-    'delta': { value: number }
+    'delta': { value: number },
+    'number': { value: number }
 }
 
 export default class MainFish {
 
     private renderer: WebGLRenderer
     private scene: Scene
-    public WIDTH: number = 32
-    private BOUNDS: number = 800
+    public WIDTH: number = 16 // 32
+    private BOUNDS: number = 200 // 800
     private velocityVariable: GPUVariableDetail
     private positionVariable: GPUVariableDetail
     private positionUniforms: { [uniform: string]: IUniform<any>; }
@@ -45,10 +46,23 @@ export default class MainFish {
     private fishUniforms: FishUniform
     private last: number = performance.now();
     private gpuCompute: GPUComputationRenderer
+    private fishGeometry: FishGeometry
     
     constructor(renderer: WebGLRenderer, scene: Scene) {
         this.renderer = renderer
         this.scene = scene
+
+        this.fishGeometry = new FishGeometry(this.WIDTH)
+
+        // For Vertex and Fragment
+        this.fishUniforms = {
+            'color': { value: new Color(0xff2200 ) },
+            'texturePosition': { value: null },
+            'textureVelocity': { value: null },
+            'time': { value: 1.0 },
+            'delta': { value: 0.0 },
+            'number': { value: 10.0 }
+        };
 
         this.initComputeRenderer()
         this.initFishes()
@@ -117,9 +131,10 @@ export default class MainFish {
 
         const effectController = {
             separation: 20.0,
-            alignment: 20.0,
-            cohesion: 20.0,
-            freedom: 0.75
+            alignment: 0.0,
+            cohesion: 1.0,
+            freedom: 0.75,
+            number: 100.0,
         };
 
         const valuesChanger = () => {
@@ -128,6 +143,7 @@ export default class MainFish {
             this.velocityUniforms[ 'alignmentDistance' ].value = effectController.alignment;
             this.velocityUniforms[ 'cohesionDistance' ].value = effectController.cohesion;
             this.velocityUniforms[ 'freedomFactor' ].value = effectController.freedom;
+            this.fishUniforms[ 'number' ].value = effectController.number;
 
         };
 
@@ -136,20 +152,20 @@ export default class MainFish {
         gui.add( effectController, 'separation', 0.0, 100.0, 1.0 ).onChange( valuesChanger );
         gui.add( effectController, 'alignment', 0.0, 100, 0.001 ).onChange( valuesChanger );
         gui.add( effectController, 'cohesion', 0.0, 100, 0.025 ).onChange( valuesChanger );
+        gui.add( effectController, 'number', 0.0, 256, 1.0 ).onChange( valuesChanger );
         gui.close();
 
     }
 
     initFishes() {
-        const geometry = new FishGeometry(this.WIDTH)
-
         // For Vertex and Fragment
         this.fishUniforms = {
             'color': { value: new Color(0xff2200 ) },
             'texturePosition': { value: null },
             'textureVelocity': { value: null },
             'time': { value: 1.0 },
-            'delta': { value: 0.0 }
+            'delta': { value: 0.0 },
+            'number': { value: 100.0 }
         };
 
         // THREE.ShaderMaterial
@@ -157,11 +173,11 @@ export default class MainFish {
             uniforms: this.fishUniforms,
             vertexShader: fishVertexShader,
             fragmentShader: fishFragmentShader,
-            side: DoubleSide
-
+            side: DoubleSide,
+            transparent: true
         } );
 
-        const fishMesh = new Mesh( geometry, material );
+        const fishMesh = new Mesh( this.fishGeometry, material );
         fishMesh.rotation.y = Math.PI / 2;
         fishMesh.matrixAutoUpdate = false;
         fishMesh.updateMatrix();
@@ -215,6 +231,7 @@ export default class MainFish {
         this.velocityUniforms[ 'delta' ].value = delta;
         this.fishUniforms[ 'time' ].value = now;
         this.fishUniforms[ 'delta' ].value = delta;
+
 
         this.velocityUniforms[ 'predator2' ].value.set( 0.5 * 0 / (window.innerWidth * 0.5), - 0.5 * 0 / (window.innerHeight * 0.5), 0 );
         this.velocityUniforms[ 'predator' ].value.set( 0.5 * mouseX / (window.innerWidth * 0.5), - 0.5 * mouseY / (window.innerHeight * 0.5), 0 );
