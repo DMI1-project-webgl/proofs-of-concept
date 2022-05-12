@@ -1,4 +1,5 @@
-import { Scene, WebGLRenderer, PerspectiveCamera, Vector2 } from 'three'
+import { Scene, WebGLRenderer, PerspectiveCamera, Mesh,BoxGeometry, MeshBasicMaterial, Vector3, Points } from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 export default class MainScene {
     private canvas: HTMLCanvasElement
@@ -6,6 +7,9 @@ export default class MainScene {
     private camera!: PerspectiveCamera
     private renderer!: WebGLRenderer
     private period: number
+    private mesh!: Mesh
+    private controls!: OrbitControls
+    private points!: Array<any>
 
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
@@ -28,10 +32,27 @@ export default class MainScene {
         const aspect = gl.drawingBufferWidth / gl.drawingBufferHeight
 
         this.scene = new Scene()
-        this.camera = new PerspectiveCamera(90, aspect, 0.01, 1000)
 
-        this.camera.position.set(0, 0, 10)
+        this.mesh = new Mesh(
+            new BoxGeometry(1, 1, 1, 5, 5, 5),
+            new MeshBasicMaterial({ color: 0xff0000 })
+        )
+        this.scene.add(this.mesh)
+
+        this.camera = new PerspectiveCamera(75, aspect, 1.0, 1000)
+
+        this.camera.position.set(0, 0, 3)
         this.camera.lookAt(0, 0, 0)
+
+        // Controls
+        this.controls = new OrbitControls(this.camera, this.canvas)
+        this.controls.enableDamping = true
+
+        this.points = [{
+                position : new Vector3(0.0, 0.0, 0.0),
+                element : document.querySelector('.point-0')
+            }]
+        
     }
     
     // Run app, load things, add listeners, ...
@@ -68,6 +89,24 @@ export default class MainScene {
         // Animation
         // Periodique time
         const tn = ((Date.now() * 0.001) % this.period) / this.period
+
+        // Update controls
+        this.controls.update()
+
+        // Go through each point
+        for(const point of this.points)
+        {
+            const screenPosition = point.position.clone()
+            screenPosition.project(this.camera)
+
+            const translateX = (screenPosition.x * this.canvas.clientWidth * 0.5)
+            const translateY = -screenPosition.y * this.canvas.clientHeight * 0.5
+            //transform: translateX(11.1454px) translateY(-18.9525px);
+            console.log(translateX)
+            console.log(translateY)
+            point.element.style.transform = `translateX(${translateX}px) translateY(${translateY}px)`
+        }
+
 
         // Render ...
         this.render()
